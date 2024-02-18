@@ -1,3 +1,4 @@
+// index.js FE
 function fetchEmployees() {
   fetch('http://localhost:3000/api/v1/employee')
     .then(response => response.json())
@@ -19,6 +20,7 @@ function fetchEmployees() {
         const deleteButton = document.createElement('button');
         deleteButton.textContent = 'Delete';
         deleteButton.classList.add('btn', 'btn-danger', 'btn-sm');
+        deleteButton.addEventListener('click', () => deleteEmployee(item.id)); // Add event listener to delete button
         deleteCell.appendChild(deleteButton);
 
         row.appendChild(deleteCell)
@@ -29,24 +31,56 @@ function fetchEmployees() {
     .catch(error => console.error(error))
 }
 
-// TODO
-// add event listener to submit button
+// Add event listener to submit button
+const submitButton = document.getElementById('submit');
+submitButton.addEventListener('click', createEmployee);
 
-// TODO
-// add event listener to delete button
+// Add event listener to delete buttons
+document.addEventListener('click', function(event) {
+  if (event.target.classList.contains('btn-danger')) {
+    const id = event.target.parentElement.parentElement.firstElementChild.textContent;
+    deleteEmployee(id);
+  }
+});
 
-// TODO
-function createEmployee (){
-  // get data from input field
-  // send data to BE
-  // call fetchEmployees
+function createEmployee() {
+  const name = document.getElementById('name').value; 
+  const id = document.getElementById('id').value; 
+
+  // Send a POST request to your backend API to create a new employee
+  fetch('http://localhost:3000/api/v1/employee', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ name: name, id: id }) // Send both name and id in the request body
+  })
+  .then(response => {
+    if (response.ok) {
+      // If creation is successful, refresh the table
+      fetchEmployees();
+    } else {
+      throw new Error('Failed to create employee');
+    }
+  })
+  .catch(error => console.error(error));
 }
 
-// TODO
-function deleteEmployee (){
-  // get id
-  // send id to BE
-  // call fetchEmployees
+
+function deleteEmployee(id) {
+  // Send a DELETE request to your backend API to delete the employee with the specified ID
+  fetch(`http://localhost:3000/api/v1/employee/${id}`, {
+    method: 'DELETE',
+  })
+  .then(response => {
+    if (response.ok) {
+      // If deletion is successful, refresh the table
+      fetchEmployees();
+    } else {
+      throw new Error('Failed to delete employee');
+    }
+  })
+  .catch(error => console.error(error));
 }
 
-fetchEmployees()
+fetchEmployees();
